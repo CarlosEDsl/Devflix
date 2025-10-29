@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateSchedulingDto } from './dto/create-scheduling.dto';
 import { UpdateSchedulingDto } from './dto/update-scheduling.dto';
 import { PrismaService } from 'src/prisma.service';
@@ -10,7 +10,7 @@ export class SchedulingsService {
 
   async create(createSchedulingDto: CreateSchedulingDto) {
     if(createSchedulingDto.startDateTime > createSchedulingDto.endDateTime) {
-      throw new Error("A data de inicio da atividade é maior que a final");
+      throw new BadRequestException("A data de início deve ser anterior à data de término!");
     }
 
     const userFound = await this.prismaService.user.findUnique({
@@ -20,26 +20,35 @@ export class SchedulingsService {
     })
 
     if(!userFound) {
-      throw Error("Usuário inválido!")
+      throw new NotFoundException("Usuário inválido!")
     }
 
-    return await this.prismaService.scheduling.create(createSchedulingDto);
+    return await this.prismaService.scheduling.create({
+      data: createSchedulingDto
+    });
 
   }
 
-  findAll() {
-    return `This action returns all schedulings`;
+  async findAll() {
+    return await this.prismaService.scheduling.findMany();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} scheduling`;
+  async findOne(id: number) {
+    return await this.prismaService.scheduling.findUnique({
+      where: { id }
+    })
   }
 
-  update(id: number, updateSchedulingDto: UpdateSchedulingDto) {
-    return `This action updates a #${id} scheduling`;
+  async update(id: number, updateSchedulingDto: UpdateSchedulingDto) {
+    return await this.prismaService.scheduling.update({
+      where: { id },
+      data: updateSchedulingDto
+    });
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} scheduling`;
+  async remove(id: number) {
+    return await this.prismaService.scheduling.delete({
+      where: { id }
+    });
   }
 }

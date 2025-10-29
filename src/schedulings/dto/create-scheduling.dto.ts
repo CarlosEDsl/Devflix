@@ -11,12 +11,12 @@ export class CreateSchedulingDto {
   @IsString()
   @MinLength(3)
   @MaxLength(50)
-  title: String;
+  title: string;
 
   @IsString()
   @IsOptional()
   @MaxLength(255)
-  description?: String;
+  description?: string;
 
   @IsDate()
   startDateTime: Date;
